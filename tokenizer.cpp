@@ -22,7 +22,7 @@ bool Tokenizer::isNonZero(char c){
 bool Tokenizer::isAllowedAsciiCharacter(char c){
     return (c != '\"' && c != '\n');
 }
-Token Tokenizer::checkForSymbol(char c){
+Token Tokenizer::checkForSymbol(char c){ //TODO: Change this to
     std::string symbol = "";
     Token finalToken = Token();
     symbol += c;
@@ -55,6 +55,21 @@ Token Tokenizer::checkForKeyword(std::string s ){
     return Token();
 }
 
+void Tokenizer::removeIgnoredChars(char c){
+    std::cout << "Entered " << c << std::endl;
+    while(c == ' ' || c == '\n'){
+        std::cout << "Entered " << c << std::endl;
+        code.get(c);
+    }
+    if(c == '/'){
+        code.get(c);
+        if(c == '/'){
+            while(c != '\n') {code.get(c);}
+        }
+    }
+
+}
+
 Token Tokenizer::getNextToken(){
     char c;
     Tokenizer::code.get(c);
@@ -67,12 +82,9 @@ Token Tokenizer::getNextToken(){
         Utils::debug("End Of FIle Encountered");
         return Token(TokenType::tk_eof, "EOF");
     }
-    
-    while(c == ' ' || c == '\n'){
-        Utils::debug("Found whitespace or newline");
-        code.get(c);
-    }
-    
+
+    removeIgnoredChars(c); //TODO: Consider tabs 
+
     if(isNonZero(c)){
         Utils::debug("Found Number");
         tokenString += c;
@@ -127,3 +139,5 @@ Token Tokenizer::getNextToken(){
     }
     throw std::runtime_error("error");
 }
+
+//TODO:

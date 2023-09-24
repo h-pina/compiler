@@ -15,6 +15,7 @@ public:
     bool isDigit(char c);
     bool isNonZero(char c);
     bool isAllowedAsciiCharacter(char c);
+    void removeIgnoredChars(char c);
     Token checkForSymbol(char c ); 
     Token checkForKeyword(std::string c); 
     Token getNextToken();
