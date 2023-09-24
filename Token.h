@@ -12,17 +12,11 @@ public:
 
 //Token Objects pre created
 namespace PreDefinedTokens{
-    const Token symbols[20] = {
+    const Token singCharSymbols[] = {
         Token(TokenType::tk_minus , "-"),
         Token(TokenType::tk_plus,"+"),
         Token(TokenType::tk_greaterThan,">"),
-        Token(TokenType::tk_greaterEqualThan,">="),
         Token(TokenType::tk_lessThan,"<"),
-        Token(TokenType::tk_lessEqualThan,"<="),
-        Token(TokenType::tk_and,"&&"),
-        Token(TokenType::tk_notEqual,"!="),
-        Token(TokenType::tk_equal,"=="),
-        Token(TokenType::tk_or,"||"),
         Token(TokenType::tk_divBy,"/"),
         Token(TokenType::tk_mulBy,"*"),
         Token(TokenType::tk_factor,"!"),
@@ -35,14 +29,23 @@ namespace PreDefinedTokens{
         Token(TokenType::tk_assign,"=")
     };
 
-    const Token keywords[10] = {
-        Token(TokenType::tk_intType,"int"),
+    const Token doubleCharSymbols[] = {
+        Token(TokenType::tk_greaterEqualThan,">="),
+        Token(TokenType::tk_lessEqualThan,"<="),
+        Token(TokenType::tk_and,"&&"),
+        Token(TokenType::tk_notEqual,"!="),
+        Token(TokenType::tk_equal,"=="),
+        Token(TokenType::tk_or,"||")
+    };
+
+    const Token keywords[] = {
         Token(TokenType::tk_stringType,"string"),
         Token(TokenType::tk_floatType,"float"),
         Token(TokenType::tk_class, "class"),
         Token(TokenType::tk_if,"if"),
         Token(TokenType::tk_else,"else"),
         Token(TokenType::tk_do,"do"),
+        Token(TokenType::tk_intType,"int"),
         Token(TokenType::tk_while,"while"),
         Token(TokenType::tk_read,"read"),
         Token(TokenType::tk_write,"write")

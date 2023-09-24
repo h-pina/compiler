@@ -5,6 +5,11 @@
 
 
 Tokenizer::Tokenizer(){}
+void Tokenizer::storeCodeIntoBuffer(std::string filename){
+    std::ifstream f(filename);
+    Tokenizer::code << f.rdbuf();
+}
+
 bool Tokenizer::isLetter(char c ){
     return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
 }
@@ -14,39 +19,40 @@ bool Tokenizer::isDigit(char c){
 bool Tokenizer::isNonZero(char c){
     return (c>48 && c<=57);
 }
-
 bool Tokenizer::isAllowedAsciiCharacter(char c){
     return (c != '\"' && c != '\n');
 }
-
-//TODO: Resolve problem with <= and !=, for example 
-Token Tokenizer::checkForSymbol(char c ){
-    for(Token token : PreDefinedTokens::symbols){
-        if(token.token[0] == c){
-            return token;
+Token Tokenizer::checkForSymbol(char c){
+    std::string symbol = "";
+    Token finalToken = Token();
+    symbol += c;
+    
+    //Check for single character symbols
+    for(Token token : PreDefinedTokens::singCharSymbols){ 
+        if(token.token == symbol){
+            finalToken = token;
         }
     }
-    return Token();
+    code.get(c);
+    if(!code.eof()){
+        symbol += c;
+        for(Token token : PreDefinedTokens::doubleCharSymbols){ 
+            if(token.token == symbol){
+                finalToken =  token;
+                return finalToken;
+            }
+        }
+        code.putback(c);
+    }
+    return finalToken;
 }
-
-//Also fix this I have no idea whats going on
 Token Tokenizer::checkForKeyword(std::string s ){
     for(Token t : PreDefinedTokens::keywords){
-        
-        Utils::debug(t.token);
-        Utils::debug(s);
-        Utils::debug("");
-        if(t.token.compare(s) == 0){
-            Utils::debug("-----------------------------------");
+        if(t.token == s){
             return t;
         }
     }
     return Token();
-}
-
-void Tokenizer::storeCodeIntoBuffer(std::string filename){
-    std::ifstream f(filename);
-    Tokenizer::code << f.rdbuf();
 }
 
 Token Tokenizer::getNextToken(){
@@ -54,16 +60,21 @@ Token Tokenizer::getNextToken(){
     Tokenizer::code.get(c);
     std::string tokenString = "";
     TokenType tokenType;
+    //std::cout << "Character Captured: " << c << std::endl;
+
 
     if(code.eof()){
+        Utils::debug("End Of FIle Encountered");
         return Token(TokenType::tk_eof, "EOF");
     }
     
-    while(c == ' '){
+    while(c == ' ' || c == '\n'){
+        Utils::debug("Found whitespace or newline");
         code.get(c);
     }
     
     if(isNonZero(c)){
+        Utils::debug("Found Number");
         tokenString += c;
         bool haveDecimalPoint = false;
         code.get(c);
@@ -81,6 +92,7 @@ Token Tokenizer::getNextToken(){
         return Token(tokenType,tokenString);
     }
     else if(isLetter(c)){
+        Utils::debug("Found Letter");
         tokenString += c;
         code.get(c);
         while(isLetter(c) || isDigit(c) || c == '_'){
@@ -96,6 +108,7 @@ Token Tokenizer::getNextToken(){
         return Token(tokenType,tokenString);
 
     }else if(c == '\"'){
+        Utils::debug("Found String");
         code.get(c); // dispose first "
         while(isAllowedAsciiCharacter(c)){
             tokenString += c;
@@ -106,7 +119,11 @@ Token Tokenizer::getNextToken(){
         tokenType = TokenType::tk_literal;
         return Token(tokenType,tokenString);
     }else{
-        return checkForSymbol(c);
+        Utils::debug("Nothing Found, checking for special symbols");
+        Token symbolCheck = checkForSymbol(c);
+        if(symbolCheck.tkType != TokenType::tk_empty){
+            return symbolCheck;
+        }
     }
     throw std::runtime_error("error");
 }
