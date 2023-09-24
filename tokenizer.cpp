@@ -19,12 +19,30 @@ bool Tokenizer::isAllowedAsciiCharacter(char c){
     return (c != '\"' && c != '\n');
 }
 
-// bool Tokenizer::isSpecial(std::string s){
-//     for (int i = 0; i<arraySize; i++){
-//         if (s == array[i]){return true;}
-//     }
-//     return false;
-// }
+//TODO: Resolve problem with <= and !=, for example 
+Token Tokenizer::checkForSymbol(char c ){
+    for(Token token : PreDefinedTokens::symbols){
+        if(token.token[0] == c){
+            return token;
+        }
+    }
+    return Token();
+}
+
+//Also fix this I have no idea whats going on
+Token Tokenizer::checkForKeyword(std::string s ){
+    for(Token t : PreDefinedTokens::keywords){
+        
+        Utils::debug(t.token);
+        Utils::debug(s);
+        Utils::debug("");
+        if(t.token.compare(s) == 0){
+            Utils::debug("-----------------------------------");
+            return t;
+        }
+    }
+    return Token();
+}
 
 void Tokenizer::storeCodeIntoBuffer(std::string filename){
     std::ifstream f(filename);
@@ -42,7 +60,6 @@ Token Tokenizer::getNextToken(){
     }
     
     while(c == ' '){
-        Utils::debug("w");
         code.get(c);
     }
     
@@ -71,8 +88,13 @@ Token Tokenizer::getNextToken(){
             code.get(c);
         }
         code.putback(c);
+        Token keywordCheck = checkForKeyword(tokenString);
+        if(keywordCheck.tkType != TokenType::tk_empty){
+            return keywordCheck;
+        }
         tokenType = TokenType::tk_identifier;
         return Token(tokenType,tokenString);
+
     }else if(c == '\"'){
         code.get(c); // dispose first "
         while(isAllowedAsciiCharacter(c)){
@@ -83,10 +105,8 @@ Token Tokenizer::getNextToken(){
 
         tokenType = TokenType::tk_literal;
         return Token(tokenType,tokenString);
+    }else{
+        return checkForSymbol(c);
     }
-    else {
-        
-    }
-    
     throw std::runtime_error("error");
 }

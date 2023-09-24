@@ -10,7 +10,7 @@ int main(){
     Token tk;
     while(tk.token != "EOF"){
         tk = tokenizer.getNextToken();
-        std::cout << "[Main] Token: " << tk.token << "| Type: " << tt[static_cast<int>(tk.tkType)] << std::endl;
+        //std::cout << "[Main] Token: " << tk.token << "| Type: " << tt[static_cast<int>(tk.tkType)] << std::endl;
     }
 
 }

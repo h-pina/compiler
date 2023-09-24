@@ -15,7 +15,8 @@ public:
     bool isDigit(char c);
     bool isNonZero(char c);
     bool isAllowedAsciiCharacter(char c);
-    bool isSpecial(std::string c, int arraySize); //for special symbols definitions
+    Token checkForSymbol(char c ); 
+    Token checkForKeyword(std::string c); 
     Token getNextToken();
     void storeCodeIntoBuffer(std::string filename);
 };

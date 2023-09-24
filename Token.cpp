@@ -5,4 +5,7 @@ Token::Token(TokenType tkt, std::string tokenStr){
     token = tokenStr;
 }
 
-Token::Token(){}
+Token::Token(){
+    tkType = TokenType::tk_empty;
+    token = "";
+}

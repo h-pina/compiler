@@ -1,1 +1,1 @@
-hugo 123456 123.123456 "testStringNaqueleModel"
+hugo 123456 123.123456 "testStringNaqueleModel" int class string /=

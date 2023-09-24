@@ -43,5 +43,7 @@ enum class TokenType{
     tk_divBy,
     tk_mulBy,
 
-    tk_eof
+    tk_eof,
+
+    tk_empty
 };
