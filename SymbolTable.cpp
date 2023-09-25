@@ -4,7 +4,7 @@
 
 SymbolTable::SymbolTable(){
     for(Token t : PreDefinedTokens::keywords){
-        insert(t.token, t);
+        insert(t.lexeme, t);
     }
 }
 

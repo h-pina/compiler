@@ -1,3 +1,4 @@
+//Specifies all the available token types
 enum class TokenType{
     //reserved words
     tk_class,
@@ -45,5 +46,5 @@ enum class TokenType{
 
     tk_eof,
 
-    tk_empty
+    tk_empty // Used on the default empty token
 };

@@ -1,69 +1,85 @@
 #include <fstream>
-#include "Tokenizer.h"
-#include "utils.h"
+#include "Lexer.h"
 
-
-Tokenizer::Tokenizer(){}
-void Tokenizer::storeCodeIntoBuffer(std::string filename){
-    std::ifstream f(filename);
-    Tokenizer::code << f.rdbuf();
+Lexer::Lexer(std::string file){
+    filename = file;
+    storeCodeIntoBuffer(filename);
+    lineCount = 1;
 }
 
-bool Tokenizer::isLetter(char c ){
+void Lexer::storeCodeIntoBuffer(std::string filename){
+    std::ifstream f(filename);
+    Lexer::code << f.rdbuf();
+}
+
+bool Lexer::isLetter(char c ){
     return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
 }
-bool Tokenizer::isDigit(char c){
+
+bool Lexer::isDigit(char c){
     return (c>=48 && c<=57);
 }
-bool Tokenizer::isNonZero(char c){
+
+bool Lexer::isNonZero(char c){
     return (c>48 && c<=57);
 }
-bool Tokenizer::isAllowedAsciiCharacter(char c){
+
+bool Lexer::isAllowedAsciiCharacter(char c){
     return (c != '\"' && c != '\n');
 }
-Token Tokenizer::checkForSymbol(char c){
+
+Token Lexer::checkForSymbol(char c){
     std::string symbol = "";
     Token finalToken = Token();
     symbol += c;
     
     //Check for single character symbols
     for(Token token : PreDefinedTokens::singCharSymbols){ 
-        if(token.token == symbol){
+        if(token.lexeme == symbol){
             finalToken = token;
         }
     }
+    
+    //check for double character symbols
     code.get(c);
     if(!code.eof()){
-        symbol += c;
+        symbol += c; //Build potential double character symbols
         for(Token token : PreDefinedTokens::doubleCharSymbols){ 
-            if(token.token == symbol){
+            if(token.lexeme == symbol){
                 finalToken =  token;
                 return finalToken;
             }
         }
-        code.putback(c);
+        code.putback(c); //if no symbol is found, return the last character to code buffer
     }
     return finalToken;
 }
-Token Tokenizer::checkForKeyword(std::string s ){
+
+Token Lexer::checkForKeyword(std::string s ){
     for(Token t : PreDefinedTokens::keywords){
-        if(t.token == s){
+        if(t.lexeme == s){
             return t;
         }
     }
-    return Token();
+    return Token(); //if no keyword found, return default empty token
 }
-void Tokenizer::removeIgnoredChars(char &c){
-    while(c == ' ' || c == '\n' || c == '\t' || c == '\r'){ code.get(c); }
-    if(c == '/'){
+
+void Lexer::skipIgnoredChars(char &c){
+    while(c == ' ' || c == '\n' || c == '\t' || c == '\r'){  //remove whitespaces, tabs and newlineas
+        if(c == '\n') { lineCount++; }
+        code.get(c); 
+    }
+    if(c == '/'){ //check for comments
         code.get(c);
-        if(c == '/'){
+        if(c == '/'){ //single line comment
             while(c != '\n') {code.get(c);}
+            lineCount++;
             code.get(c);
         }
-        else if (c ==  '*'){
+        else if (c ==  '*'){ //multi line comment
             bool isEndOfComment = false;
             while(!isEndOfComment) {
+                if(c == '\n') { lineCount++; }
                 code.get(c);
                 if(c == '*'){
                     code.get(c);
@@ -79,24 +95,26 @@ void Tokenizer::removeIgnoredChars(char &c){
         }
     }
 
-    while(c == ' ' || c == '\n' || c == '\t' || c == '\r'){ code.get(c); }
+    while(c == ' ' || c == '\n' || c == '\t' || c == '\r'){  //remove whitespaces, tabs and newlineas
+        if(c == '\n') { lineCount++; }
+        code.get(c); 
+    }
 }
 
-Token Tokenizer::getNextToken(){
+Token Lexer::getNextToken(){
     char c;
-    Tokenizer::code.get(c);
+    Lexer::code.get(c);
     std::string tokenString = "";
     TokenType tokenType;
 
-    if(code.eof()){
-        Utils::debug("End Of FIle Encountered");
+    skipIgnoredChars(c);
+
+    if(code.eof()){ //check if file ended
         return Token(TokenType::tk_eof, "EOF");
     }
 
-    removeIgnoredChars(c);
-    //std::cout << "actual char: " << c << std::endl;
-    if(isNonZero(c)){
-        Utils::debug("Found Number");
+    if(isNonZero(c)){ //check for real and integer numbers
+        
         tokenString += c;
         bool haveDecimalPoint = false;
         code.get(c);
@@ -113,48 +131,51 @@ Token Tokenizer::getNextToken(){
         tokenType = haveDecimalPoint ? TokenType::tk_real : TokenType::tk_int;
         return Token(tokenType,tokenString);
     }
-    else if(c == '0'){
+    else if(c == '0'){ //edge case: number = 0
         return Token(TokenType::tk_int, "0");
     }
-    else if(isLetter(c)){
-        Utils::debug("Found Letter");
+    else if(isLetter(c)){ //check for identifiers
         tokenString += c;
         code.get(c);
+        
         while(isLetter(c) || isDigit(c) || c == '_'){
             tokenString += c;
             code.get(c);
         }
         code.putback(c);
+        
         Token keywordCheck = checkForKeyword(tokenString);
-        if(keywordCheck.tkType != TokenType::tk_empty){
-            return keywordCheck;
+        if(keywordCheck.tkType != TokenType::tk_empty){ //if any keyword is found, return it
+            return keywordCheck; 
         }
-        tokenType = TokenType::tk_identifier;
+        
+        tokenType = TokenType::tk_identifier; // if no keyword found, treat token as a normal idenftifier
         Token t = Token(tokenType,tokenString);
-        symbolTable.insert(t.token, t);
+        
+        
+        symbolTable.insert(t.lexeme, t); //add  identifier to symbol table
         return t;
 
-    }else if(c == '\"'){
-        Utils::debug("Found String");
-        code.get(c); // dispose first "
+    }else if(c == '\"'){ //check for string
+        
+        code.get(c); // dispose first double-quotes
         while(isAllowedAsciiCharacter(c)){
             tokenString += c;
             code.get(c);
         }
-        if (c == '\n') throw std::runtime_error("error");
+        if (c == '\n') { throw std::runtime_error(std::string("Lexer found a problem recognizing the tokens at line ") + std::to_string(Lexer::lineCount)); } 
 
         tokenType = TokenType::tk_literal;
         return Token(tokenType,tokenString);
-    }else{
-        Utils::debug("Nothing Found, checking for special symbols");
+    }else{ //if no other tokens identified, check for symbols
         Token symbolCheck = checkForSymbol(c);
         if(symbolCheck.tkType != TokenType::tk_empty){
             return symbolCheck;
         }
     }
-    throw std::runtime_error("error");
+    throw std::runtime_error(std::string("Lexer found a problem recognizing the tokens at line ") + std::to_string(Lexer::lineCount)); //if nothing is found, return error
 }
 
-void Tokenizer::printSymbolTable(){
+void Lexer::printSymbolTable(){ //This works as a wrapper to symbolTable`s printTable function
     symbolTable.printTable();
 }

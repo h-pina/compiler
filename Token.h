@@ -4,14 +4,15 @@
 class Token
 {
 public:
-    TokenType tkType;
-    std::string token;
-    Token(TokenType tkType, std::string token);
-    Token();
+    TokenType tkType; //TokenType
+    std::string lexeme;
+    Token(TokenType tkType, std::string lex);
+    Token(); //Default constructor: This creates an empty token , used as a fallback object when no token is found
 };
 
-//Token Objects pre created
-namespace PreDefinedTokens{
+
+//This namespace contains a collection of predefined tokens that can be freely acessed and used. 
+namespace PreDefinedTokens{ 
     const Token singCharSymbols[] = {
         Token(TokenType::tk_minus , "-"),
         Token(TokenType::tk_plus,"+"),
