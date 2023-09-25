@@ -1,10 +1,20 @@
 #include <stdio.h>
 #include <iostream>
+#include <cstdio>
 #include <string>
 #include "Lexer.h"
 
+std::string rightPadString(int len, std::string string){
+    int newLen = len - string.length();
+    std::string pad(newLen, ' ');
+    return (string + pad);
+
+}
+
 //This is a simple test file. It will print out the token division of the file named testfile.txt
 int main(){
+    //freopen("output.txt","w",stdout); //This line can be used  pipe the output of the lexer to the file output.txt
+    
     std::string filename = "testfile.txt"; //You can change the tested file by changing this variable
 
     //This array is used for printing the token types of each type. Since the TokenTypes structure is a enum, it serves as an index
@@ -19,10 +29,15 @@ int main(){
 
     while(tk.lexeme != "EOF"){
         tk = lexer.getNextToken();
-        std::cout << "Lexeme: " << tk.lexeme << " | TokenType: " << tokenTypesToString[static_cast<int>(tk.tkType)] << std::endl;
+        //print to stdout
+        std::cout << "Lexeme: " << rightPadString(30,tk.lexeme) << " | TokenType: " << tokenTypesToString[static_cast<int>(tk.tkType)] << std::endl;
+        std::cout << "---------------------------------------------------------------------------" << std::endl;
     }
-    
+
+    //print to stdout
+    std::cout << "===========================================================================" << std::endl << std::endl;
     std::cout << "File LineCount: " << lexer.lineCount << std::endl;
+    std::cout << "---------------------------------------------------------------------------" << std::endl << std::endl;
     
     lexer.printSymbolTable(); 
 

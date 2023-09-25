@@ -29,7 +29,8 @@ bool SymbolTable::contains(std::string key){
 void SymbolTable::printTable(){
     std::cout << "Symbols in symbolTable: " << std::endl;
     for(auto iter = symbolTable.begin(); iter != symbolTable.end(); iter++){
-        std::cout << "   " << iter->first << std::endl;
+        std::cout << "  " <<iter->first << ", ";
     }
+    std::cout << std::endl << std::endl;
 
 }

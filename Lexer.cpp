@@ -80,6 +80,7 @@ void Lexer::skipIgnoredChars(char &c){
             bool isEndOfComment = false;
             while(!isEndOfComment) {
                 if(c == '\n') { lineCount++; }
+                if(code.eof()) {throw std::runtime_error(std::string("Unclosed comment ")); }
                 code.get(c);
                 if(c == '*'){
                     code.get(c);
