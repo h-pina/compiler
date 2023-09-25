@@ -1,4 +1,3 @@
-
 #include <fstream>
 #include "Tokenizer.h"
 #include "utils.h"
@@ -22,7 +21,7 @@ bool Tokenizer::isNonZero(char c){
 bool Tokenizer::isAllowedAsciiCharacter(char c){
     return (c != '\"' && c != '\n');
 }
-Token Tokenizer::checkForSymbol(char c){ //TODO: Change this to
+Token Tokenizer::checkForSymbol(char c){
     std::string symbol = "";
     Token finalToken = Token();
     symbol += c;
@@ -54,20 +53,33 @@ Token Tokenizer::checkForKeyword(std::string s ){
     }
     return Token();
 }
-
-void Tokenizer::removeIgnoredChars(char c){
-    std::cout << "Entered " << c << std::endl;
-    while(c == ' ' || c == '\n'){
-        std::cout << "Entered " << c << std::endl;
-        code.get(c);
-    }
+void Tokenizer::removeIgnoredChars(char &c){
+    while(c == ' ' || c == '\n' || c == '\t' || c == '\r'){ code.get(c); }
     if(c == '/'){
         code.get(c);
         if(c == '/'){
             while(c != '\n') {code.get(c);}
+            code.get(c);
+        }
+        else if (c ==  '*'){
+            bool isEndOfComment = false;
+            while(!isEndOfComment) {
+                code.get(c);
+                if(c == '*'){
+                    code.get(c);
+                    if(c == '/') {isEndOfComment = true;}
+                    else{code.putback(c);}
+                }
+               
+            }
+            code.get(c);
+        }else{
+            code.putback(c);
+            c = '/';
         }
     }
 
+    while(c == ' ' || c == '\n' || c == '\t' || c == '\r'){ code.get(c); }
 }
 
 Token Tokenizer::getNextToken(){
@@ -75,23 +87,21 @@ Token Tokenizer::getNextToken(){
     Tokenizer::code.get(c);
     std::string tokenString = "";
     TokenType tokenType;
-    //std::cout << "Character Captured: " << c << std::endl;
-
 
     if(code.eof()){
         Utils::debug("End Of FIle Encountered");
         return Token(TokenType::tk_eof, "EOF");
     }
 
-    removeIgnoredChars(c); //TODO: Consider tabs 
-
+    removeIgnoredChars(c);
+    //std::cout << "actual char: " << c << std::endl;
     if(isNonZero(c)){
         Utils::debug("Found Number");
         tokenString += c;
         bool haveDecimalPoint = false;
         code.get(c);
 
-        while(isDigit(c) || c == '.'){
+        while(isDigit(c) || c == '.' ){
             if (c == '.'){
                 if(!haveDecimalPoint){ haveDecimalPoint = true; }
                 else throw std::runtime_error("error");
@@ -102,6 +112,9 @@ Token Tokenizer::getNextToken(){
         code.putback(c);
         tokenType = haveDecimalPoint ? TokenType::tk_real : TokenType::tk_int;
         return Token(tokenType,tokenString);
+    }
+    else if(c == '0'){
+        return Token(TokenType::tk_int, "0");
     }
     else if(isLetter(c)){
         Utils::debug("Found Letter");
@@ -117,7 +130,9 @@ Token Tokenizer::getNextToken(){
             return keywordCheck;
         }
         tokenType = TokenType::tk_identifier;
-        return Token(tokenType,tokenString);
+        Token t = Token(tokenType,tokenString);
+        symbolTable.insert(t.token, t);
+        return t;
 
     }else if(c == '\"'){
         Utils::debug("Found String");
@@ -140,4 +155,6 @@ Token Tokenizer::getNextToken(){
     throw std::runtime_error("error");
 }
 
-//TODO:
+void Tokenizer::printSymbolTable(){
+    symbolTable.printTable();
+}

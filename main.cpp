@@ -12,5 +12,6 @@ int main(){
         tk = tokenizer.getNextToken();
         std::cout << "[Main] Token: " << tk.token << "| Type: " << tt[static_cast<int>(tk.tkType)] << std::endl;
     }
+    tokenizer.printSymbolTable();
 
 }

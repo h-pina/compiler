@@ -1,3 +1,8 @@
-class Teste1
-//Comment
-int a/10;
+class Teste2
+/*Teste de comentário
+com mais de uma linha*/
+int a, 9valor, b_1, b_2 ;
+//Commentss
+{
+int i = 0;
+}
