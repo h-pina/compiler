@@ -8,11 +8,11 @@ class Lexer
 private:
     std::string filename; 
     std::stringstream code; //stores the code as a single string
-    SymbolTable symbolTable;
 
     void storeCodeIntoBuffer(std::string filename);
 
 public:
+    SymbolTable symbolTable;
     int lineCount; //line count is freely acessible. 
     
     Lexer(std::string file); // Default constructor: fills code buffer and initializes variables
