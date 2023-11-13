@@ -12,5 +12,5 @@ int main(){
     Lexer lexer(filename); //Lexer initialization 
     Parser parser(lexer, lexer.symbolTable);
     AST ast = parser.buildAst();
-    ast.showTree(nullptr);
+    int i = 0;
 }

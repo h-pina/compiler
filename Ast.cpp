@@ -2,24 +2,16 @@
 #include <iostream>
 
 
-astNode* AST::newNode(Token tk, astNode &parent ){
-    std::cout << "[I] Adding " << tk.lexeme << " to tree" << "\n";
-    astNode newNode = {tk, parent};
+int AST::newNode(Token tk, int parentIndex){
+    
+    astNode newNode = {tk, parentIndex};
     if(nodes.size() == 0){
-        std::cout<<"Enter" << std::endl;
         nodes.push_back(newNode);
-        root = nodes.back(); 
+        root = nodes.size() - 1; 
     }
-    else if(parent != nullptr){
+    else {
         nodes.push_back(newNode);
-        parent->children.push_back(nodes.back()); //This can be problematic idk
-    }else{
-     std::cout<<"Cant add to tree" << std::endl; //TODO: Remove      
+        nodes[parentIndex].children.push_back(nodes.size()-1); 
     }
-    return &(nodes.back());
-}
-
-
-void AST::showTree(astNode* node){
-    std::cout << ":D" << std::endl;
+    return nodes.size() - 1; 
 }
